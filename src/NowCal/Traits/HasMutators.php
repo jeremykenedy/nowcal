@@ -3,7 +3,6 @@
 namespace NowCal\Traits;
 
 use Ramsey\Uuid\Uuid;
-use Illuminate\Support\Str;
 
 trait HasMutators
 {
@@ -13,18 +12,6 @@ trait HasMutators
      * @var string
      */
     protected static $crlf = "\r\n";
-
-    /**
-     * Magic method for getting computed properties.
-     *
-     * @param string $name
-     */
-    public function __get(string $key)
-    {
-        if (method_exists(self::class, $method = 'get'.Str::studly($key).'Attribute')) {
-            return $this->{$method}();
-        }
-    }
 
     /**
      * Concatenate the invite's parameters.

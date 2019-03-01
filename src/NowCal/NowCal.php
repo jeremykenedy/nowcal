@@ -33,7 +33,7 @@ class NowCal
     protected $version = '2.0';
 
     /**
-     * The .ics raw array output.
+     * Holds the .ics details.
      *
      * @var array
      */
@@ -47,6 +47,28 @@ class NowCal
     public function __construct(array $params = [])
     {
         $this->merge($params);
+    }
+
+    /**
+     * Fetch computed properties.
+     *
+     * @param string $name
+     */
+    public function __get(string $key)
+    {
+        if (method_exists(self::class, $method = 'get'.Str::studly($key).'Attribute')) {
+            return $this->{$method}();
+        }
+    }
+
+    /**
+     * Spits out the plain text event.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->plain;
     }
 
     /**
@@ -115,6 +137,7 @@ class NowCal
         if ($this->has($key)) {
             return $this->getParameterKey($key).':'.$this->getParameterValue($key);
         }
+
         if ($this->required($key)) {
             throw new \Exception('Key "'.$key.'" is not set but is required');
         }
