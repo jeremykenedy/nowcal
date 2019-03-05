@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\NowCal;
+namespace Tests\NowCal\Components\Events;
 
 use Tests\TestCase;
 use Carbon\CarbonInterval;
@@ -12,7 +12,7 @@ class DurationAttributeTest extends TestCase
     {
         $this->nowcal->duration($time = '1h');
 
-        $this->assertEquals($time, $this->nowcal->duration);
+        $this->assertEquals($time, $this->nowcal->duration());
     }
 
     /** @test */
@@ -32,7 +32,7 @@ class DurationAttributeTest extends TestCase
             return $duration;
         });
 
-        $this->assertEquals($duration, $this->nowcal->end);
+        $this->assertEquals($duration, $this->nowcal->end());
     }
 
     /** @test */
@@ -44,14 +44,14 @@ class DurationAttributeTest extends TestCase
         $this->nowcal->duration($duration)
             ->end($end);
 
-        $this->assertEquals(null, $this->nowcal->end);
-        $this->assertEquals($duration, $this->nowcal->duration);
+        $this->assertEquals(null, $this->nowcal->end());
+        $this->assertEquals($duration, $this->nowcal->duration());
 
         $this->nowcal = $this->createNowCalInstance();
         $this->nowcal->end($end)
             ->duration($duration);
 
-        $this->assertEquals(null, $this->nowcal->duration);
-        $this->assertEquals($end, $this->nowcal->end);
+        $this->assertEquals(null, $this->nowcal->duration());
+        $this->assertEquals($end, $this->nowcal->end());
     }
 }

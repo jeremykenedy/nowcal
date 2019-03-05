@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\NowCal;
+namespace Tests\NowCal\Components\Events;
 
 use Tests\TestCase;
 
@@ -11,7 +11,7 @@ class LocationAttributeTest extends TestCase
     {
         $this->nowcal->location($location = '123 Fake Street NW');
 
-        $this->assertEquals($location, $this->nowcal->location);
+        $this->assertEquals($location, $this->nowcal->location());
     }
 
     /** @test */
@@ -31,6 +31,6 @@ class LocationAttributeTest extends TestCase
             return $location;
         });
 
-        $this->assertEquals($location, $this->nowcal->location);
+        $this->assertEquals($location, $this->nowcal->location());
     }
 }

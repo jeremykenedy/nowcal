@@ -42,6 +42,19 @@ trait HasHelpers
     }
 
     /**
+     * Check if the key is allowed to be set.
+     *
+     * @param string $needle
+     * @param string $haystack
+     *
+     * @return bool
+     */
+    protected function allowed(string $key): bool
+    {
+        return in_array($key, $this->components);
+    }
+
+    /**
      * Check if the class has a key.
      *
      * @param string $key

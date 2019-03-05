@@ -4,33 +4,10 @@ namespace NowCal;
 
 use Illuminate\Support\Str;
 
-class NowCal
+class NowCal extends ComponentManager
 {
     use Traits\HasCasters,
-        Traits\HasHelpers,
-        Traits\HasMutators,
-        Traits\HasDateTimes,
-        Traits\HasAttributes,
-        Traits\HasStaticAccessors;
-
-    /**
-     * iCalendar Product Identifier.
-     *
-     * @see https://tools.ietf.org/html/rfc5545#section-3.7.3
-     *
-     * @var string
-     */
-    private $prodid = '-//itsnubix//NowCal//EN';
-
-    /**
-     * Specifies the minimum iCalendar specification that is required
-     * in order to interpret the iCalendar object.
-     *
-     * @see https://tools.ietf.org/html/rfc5545#section-3.7.4
-     *
-     * @var string
-     */
-    protected $version = '2.0';
+        Traits\HasHelpers;
 
     /**
      * Holds the .ics details.
@@ -72,6 +49,68 @@ class NowCal
     }
 
     /**
+     * Pass the props into the class and create a new instance.
+     *
+     * @param array $props
+     *
+     * @return \NowCal\NowCal
+     */
+    public static function create(array $props = [])
+    {
+        return new self($props);
+    }
+
+    /**
+     * Pass the props into the class and build it.
+     *
+     * @param array $props
+     *
+     * @deprecated 1.0.0 Prefer "create" syntax
+     *
+     * @return \NowCal\NowCal
+     */
+    public static function build(array $props = [])
+    {
+        return new self($props);
+    }
+
+    /**
+     * Create an ICS array and output as raw array.
+     *
+     * @param array $props
+     *
+     * @return array
+     */
+    public static function raw(array $props = []): array
+    {
+        return self::create($props)->raw;
+    }
+
+    /**
+     * Return the plain text version of the invite.
+     *
+     * @param array $props
+     *
+     * @return string
+     */
+    public static function plain(array $props = []): string
+    {
+        return self::create($props)->plain;
+    }
+
+    /**
+     * Return a path to a .ics tempfile.
+     *
+     * @param array $props
+     *
+     * @return string
+     */
+    public static function file(array $props = []): string
+    {
+        return self::create($props)->file;
+    }
+
+    /**
      * Compile the event's raw output.
      *
      * @return \NowCal\NowCal
@@ -81,44 +120,61 @@ class NowCal
         $this->output = [];
 
         $this->beginCalendar();
-        $this->createEvent();
+        $this->beginEvent();
+        $this->endEvent();
         $this->endCalendar();
 
         return $this;
     }
 
     /**
-     * Open the VCalendar tag and add necessary props.
+     * Return the invite's raw output array.
+     *
+     * @return array
      */
-    protected function beginCalendar()
+    public function getRawAttribute(): array
     {
-        $this->output[] = 'BEGIN:VCALENDAR';
-
-        foreach ($this->calendar as $key) {
-            $this->output[] = $this->getParameter($key);
-        }
+        return $this->compile()->output;
     }
 
     /**
-     * Close the VCalendar tag.
+     * Return the invite's data as plain text.
+     *
+     * @return string
      */
-    protected function endCalendar()
+    public function getPlainAttribute(): string
     {
-        $this->output[] = 'END:VCALENDAR';
+        $this->compile();
+
+        return implode(self::$crlf, $this->output);
     }
 
     /**
-     * Create the VEvent and include all its props.
+     * Creates a tempfile and returns its path.
+     *
+     * @return string
      */
-    protected function createEvent()
+    public function getFileAttribute(): string
     {
-        $this->output[] = 'BEGIN:VEVENT';
+        $filename = tempnam(sys_get_temp_dir(), 'event_').'.ic s ';
+        file_put_contents($filename, $this->plain.self::$crlf);
 
-        foreach ($this->event_parameters as $key) {
-            $this->output[] = $this->getParameter($key);
+        return $filename;
+    }
+
+    /**
+     * Loop through the provided list of parameters and if available
+     * add it to the output.
+     *
+     * @param array $parameters
+     */
+    protected function addParametersToOutput(array $parameters)
+    {
+        foreach ($parameters as $key) {
+            if ($this->has($key)) {
+                $this->output[] = $this->getParameter($key);
+            }
         }
-
-        $this->output[] = 'END:VEVENT';
     }
 
     /**
@@ -134,13 +190,7 @@ class NowCal
      */
     protected function getParameter(string $key): string
     {
-        if ($this->has($key)) {
-            return $this->getParameterKey($key).':'.$this->getParameterValue($key);
-        }
-
-        if ($this->required($key)) {
-            throw new \Exception('Key "'.$key.'" is not set but is required');
-        }
+        return $this->getParameterKey($key).':'.$this->getParameterValue($key);
     }
 
     /**
@@ -157,7 +207,6 @@ class NowCal
         switch ($name) {
             case 'start':
             case 'end':
-            case 'stamp':
                 return 'DT'.$key;
             default:
                 return $key;
@@ -169,18 +218,14 @@ class NowCal
      *
      * @param string $key
      *
-     * @return string
+     * @return string|null
      */
-    protected function getParameterValue(string $key): string
+    protected function getParameterValue(string $key): ?string
     {
-        if ($this->has($key)) {
-            if ($this->hasCaster($key)) {
-                return $this->cast($this->{$key}, $this->casts[$key]);
-            }
-
-            return $this->{$key};
+        if ($this->hasCaster($key)) {
+            return $this->cast($this->{$key}, $this->casts[$key]);
         }
 
-        return null;
+        return $this->{$key};
     }
 }

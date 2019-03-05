@@ -9,24 +9,18 @@ class NowCalTest extends TestCase
     /** @test */
     public function it_can_get_a_raw_array_output()
     {
-        $raw = $this->nowcal->raw;
-
-        $this->assertIsArray($raw);
+        $this->assertIsArray($this->nowcal->raw);
     }
 
     /** @test */
     public function it_can_get_a_plaintext_output()
     {
-        $plain = $this->nowcal->plain;
-
-        $this->assertIsString($plain);
+        $this->assertIsString($this->nowcal->plain);
     }
 
     /** @test */
     public function it_can_export_a_path_to_a_file()
     {
-        $file = $this->nowcal->file;
-
-        $this->assertIsString($file);
+        $this->assertIsString($this->nowcal->file);
     }
 }

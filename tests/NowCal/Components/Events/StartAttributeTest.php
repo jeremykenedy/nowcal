@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\NowCal;
+namespace Tests\NowCal\Components\Events;
 
 use Carbon\Carbon;
 use Tests\TestCase;
@@ -12,7 +12,7 @@ class StartAttributeTest extends TestCase
     {
         $this->nowcal->start($time = 'now');
 
-        $this->assertEquals($time, $this->nowcal->start);
+        $this->assertEquals($time, $this->nowcal->start());
     }
 
     /** @test */
@@ -33,6 +33,6 @@ class StartAttributeTest extends TestCase
             return $time;
         });
 
-        $this->assertEquals($time, $this->nowcal->start);
+        $this->assertEquals($time, $this->nowcal->start());
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\NowCal;
+namespace Tests\NowCal\Components\Events;
 
 use Tests\TestCase;
 
@@ -11,7 +11,7 @@ class SummaryAttributeTest extends TestCase
     {
         $this->nowcal->summary($summary = 'lorem ipsum dolor sit');
 
-        $this->assertEquals($summary, $this->nowcal->summary);
+        $this->assertEquals($summary, $this->nowcal->summary());
     }
 
     /** @test */
@@ -31,6 +31,6 @@ class SummaryAttributeTest extends TestCase
             return $summary;
         });
 
-        $this->assertEquals($summary, $this->nowcal->summary);
+        $this->assertEquals($summary, $this->nowcal->summary());
     }
 }
