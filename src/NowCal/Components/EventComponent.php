@@ -13,7 +13,7 @@ trait EventComponent
      *
      * @var array
      */
-    protected $event = [
+    protected $event_properties = [
         'uid',
         'dtstamp',
         'start',

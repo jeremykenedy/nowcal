@@ -4,7 +4,8 @@ namespace NowCal;
 
 abstract class ComponentManager
 {
-    use Components\EventComponent,
+    use Components\AlarmComponent,
+        Components\EventComponent,
         Components\CalendarComponent;
 
     /**
@@ -12,8 +13,12 @@ abstract class ComponentManager
      *
      * @return array
      */
-    protected function getComponentsAttribute(): array
+    protected function getPropertiesAttribute(): array
     {
-        return array_merge($this->calendar, $this->event);
+        return array_merge(
+            $this->calendar_properties,
+            $this->event_properties,
+            $this->alarm_properties
+        );
     }
 }

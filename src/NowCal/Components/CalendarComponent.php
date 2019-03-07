@@ -11,7 +11,7 @@ trait CalendarComponent
      *
      * @var array
      */
-    protected $calendar = [
+    protected $calendar_properties = [
         'prodid',
         'version',
     ];

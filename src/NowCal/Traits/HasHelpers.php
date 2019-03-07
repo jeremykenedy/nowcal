@@ -51,7 +51,7 @@ trait HasHelpers
      */
     protected function allowed(string $key): bool
     {
-        return in_array($key, $this->components);
+        return in_array($key, $this->properties);
     }
 
     /**
