@@ -16,9 +16,8 @@ abstract class ComponentManager
     protected function getPropertiesAttribute(): array
     {
         return array_merge(
-            $this->calendar_properties,
             $this->event_properties,
-            $this->alarm_properties
+            $this->calendar_properties
         );
     }
 }
