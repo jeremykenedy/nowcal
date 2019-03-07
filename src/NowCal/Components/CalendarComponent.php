@@ -42,7 +42,7 @@ trait CalendarComponent
     {
         $this->output[] = 'BEGIN:VCALENDAR';
 
-        $this->addParametersToOutput($this->calendar);
+        $this->addParametersToOutput($this->calendar_properties);
     }
 
     /**

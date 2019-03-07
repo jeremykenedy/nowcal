@@ -26,44 +26,46 @@ trait AlarmComponent
     ];
 
     /**
-     * Create and attach an alarm .
+     * Create and attach an alarm to the instance.
      *
      * @param array $props
      *
      * @return self
      */
-public function alarm(array $props): self
-{
-    $this->alarms[] = $this->createAlarm($props);
+    public function alarm(array $props): self
+    {
+        if ($this->alarmIsValid($props)) {
+            $this->alarms[] = $this->createAlarm($props);
+        }
 
-    return $this;
-}
+        return $this;
+    }
 
     /**
      * Open the VAlarm tag and add necessary props.
      */
-    protected function beginAlarm()
+    protected function addAlarms()
     {
-        if ($this->hasAlarm()) {
-            $this->output[] = 'BEGIN:VALARM';
-
-            $this->addParametersToOutput($this->calendar);
+        if ($this->hasAlarms()) {
+            foreach ($this->alarms as $alarm) {
+                $this->addAlarmToOutput($alarm);
+            }
         }
+    }
+
+    protected function addAlarmToOutput(array $alarm)
+    {
+        $this->output[] = 'BEGIN:VALARM';
+
+        $this->output[] = 'END:VALARM';
     }
 
     /**
-     * Close the VCalendar tag.
+     * Check if there are any alarms on this invite instance
+     *
+     * @return boolean
      */
-    protected function endAlarm()
-    {
-        if ($this->hasAlarm()) {
-            $this->output[] = 'END:VALARM';
-        }
-    }
-
-    /
-
-    protected function hasAlarm()
+    protected function hasAlarms(): bool
     {
         return count($this->alarms) > 0;
     }
@@ -78,5 +80,17 @@ public function alarm(array $props): self
     protected function createAlarm(array $props): array
     {
         return [];
+    }
+
+    /**
+     * Check to ensure the alarm properties are valid and
+     * contain the required information
+     *
+     * @param array $props
+     * @return array
+     */
+    protected function alarmIsValid(array $alarm): bool
+    {
+        return false;
     }
 }

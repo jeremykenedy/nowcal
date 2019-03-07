@@ -217,7 +217,7 @@ trait EventComponent
 
         $this->output[] = 'BEGIN:VEVENT';
 
-        $this->addParametersToOutput($this->event);
+        $this->addParametersToOutput($this->event_properties);
     }
 
     /**

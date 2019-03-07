@@ -121,6 +121,7 @@ class NowCal extends ComponentManager
 
         $this->beginCalendar();
         $this->beginEvent();
+        $this->addAlarms();
         $this->endEvent();
         $this->endCalendar();
 
