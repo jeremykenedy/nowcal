@@ -16,8 +16,8 @@ trait EventComponent
     protected $event_properties = [
         'uid',
         'dtstamp',
-        'start',
-        'end',
+        'dtstart',
+        'dtend',
         'summary',
         'location',
         'duration',
@@ -56,7 +56,7 @@ trait EventComponent
      *
      * @var string
      */
-    protected $start;
+    protected $dtstart;
 
     /**
      * This property specifies the date and time that a calendar
@@ -66,7 +66,7 @@ trait EventComponent
      *
      * @var string
      */
-    protected $end;
+    protected $dtend;
 
     /**
      * This property defines a short summary or subject for the
@@ -107,10 +107,10 @@ trait EventComponent
     public function start($datetime = null)
     {
         if (0 === func_num_args()) {
-            return $this->get('start');
+            return $this->get('dtstart');
         }
 
-        $this->set('start', $datetime);
+        $this->set('dtstart', $datetime);
 
         return $this;
     }
@@ -125,11 +125,11 @@ trait EventComponent
     public function end($datetime = null)
     {
         if (0 === func_num_args()) {
-            return $this->get('end');
+            return $this->get('dtend');
         }
 
         if (!$this->has('duration')) {
-            $this->set('end', $datetime);
+            $this->set('dtend', $datetime);
         }
 
         return $this;
@@ -184,7 +184,7 @@ trait EventComponent
             return $this->get('duration');
         }
 
-        if (!$this->has('end')) {
+        if (!$this->has('dtend')) {
             $this->set('duration', $duration);
         }
 

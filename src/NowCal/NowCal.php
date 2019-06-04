@@ -33,7 +33,7 @@ class NowCal extends ComponentManager
      */
     public function __get(string $key)
     {
-        if (method_exists(self::class, $method = 'get'.Str::studly($key).'Attribute')) {
+        if (method_exists(self::class, $method = 'get' . Str::studly($key) . 'Attribute')) {
             return $this->{$method}();
         }
     }
@@ -120,6 +120,7 @@ class NowCal extends ComponentManager
         $this->output = [];
 
         $this->beginCalendar();
+        $this->addTimezone();
         $this->beginEvent();
         $this->addAlarms();
         $this->endEvent();
@@ -157,8 +158,8 @@ class NowCal extends ComponentManager
      */
     public function getFileAttribute(): string
     {
-        $filename = tempnam(sys_get_temp_dir(), 'event_').'.ic s ';
-        file_put_contents($filename, $this->plain.self::$crlf);
+        $filename = tempnam(sys_get_temp_dir(), 'event_') . '.ic s ';
+        file_put_contents($filename, $this->plain . self::$crlf);
 
         return $filename;
     }
@@ -191,7 +192,7 @@ class NowCal extends ComponentManager
      */
     protected function getParameter(string $key): string
     {
-        return $this->getParameterKey($key).':'.$this->getParameterValue($key);
+        return $this->getParameterKey($key) . ':' . $this->getParameterValue($key);
     }
 
     /**
@@ -203,15 +204,7 @@ class NowCal extends ComponentManager
      */
     protected function getParameterKey(string $name): string
     {
-        $key = Str::upper($name);
-
-        switch ($name) {
-            case 'start':
-            case 'end':
-                return 'DT'.$key;
-            default:
-                return $key;
-        }
+        return Str::upper($name);
     }
 
     /**

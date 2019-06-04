@@ -17,8 +17,8 @@ trait HasCasters
         'duration' => 'duration',
         'created' => 'datetime',
         'dtstamp' => 'datetime',
-        'start' => 'datetime',
-        'end' => 'datetime',
+        'dtstart' => 'datetime',
+        'dtend' => 'datetime',
     ];
 
     /**
@@ -38,7 +38,7 @@ trait HasCasters
      */
     protected function cast($value, string $as)
     {
-        if (method_exists(self::class, $method = 'castAs'.Str::studly($as))) {
+        if (method_exists(self::class, $method = 'castAs' . Str::studly($as))) {
             return $this->{$method}($value);
         }
 

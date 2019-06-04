@@ -2,6 +2,8 @@
 
 namespace NowCal\Components;
 
+use Ramsey\Uuid\Uuid;
+
 trait AlarmComponent
 {
     /**
@@ -20,9 +22,7 @@ trait AlarmComponent
      */
     protected $alarm_properties = [
         'action',
-        'repeat',
-        'trigger',
-        'duration',
+        'trigger'
     ];
 
     /**
@@ -34,17 +34,20 @@ trait AlarmComponent
      */
     public function alarm(array $props): self
     {
-        if ($this->alarmIsValid($props)) {
-            $this->alarms[] = $this->createAlarm($props);
-        }
+        $this->alarms[] = $this->createAlarm($props);
 
         return $this;
     }
 
+    /**
+     * Build the alarm for output
+     *
+     * @param   array  $alarm
+     */
     protected function addAlarmToOutput(array $alarm)
     {
         $this->output[] = 'BEGIN:VALARM';
-
+        $this->addParametersToOutput($alarm);
         $this->output[] = 'END:VALARM';
     }
 
@@ -69,7 +72,17 @@ trait AlarmComponent
      */
     protected function createAlarm(array $props): array
     {
-        return [];
+        $alarm = [
+            'uid' => Uuid::uuid4()->toString()
+        ];
+
+        foreach ($this->alarm_properties as $key) {
+            if (array_key_exists($key, $props)) {
+                $alarm[$key] = $props[$key];
+            }
+        }
+
+        return $alarm;
     }
 
     /**
@@ -80,18 +93,5 @@ trait AlarmComponent
     protected function hasAlarms(): bool
     {
         return count($this->alarms) > 0;
-    }
-
-    /**
-     * Check to ensure the alarm properties are valid and
-     * contain the required information.
-     *
-     * @param array $props
-     *
-     * @return array
-     */
-    protected function alarmIsValid(array $alarm): bool
-    {
-        return false;
     }
 }

@@ -6,6 +6,7 @@ abstract class ComponentManager
 {
     use Components\AlarmComponent,
         Components\EventComponent,
+        Components\TimezoneComponent,
         Components\CalendarComponent;
 
     /**
