@@ -4,7 +4,7 @@ namespace NowCal\Components;
 
 use Ramsey\Uuid\Uuid;
 
-trait AlarmComponent
+class AlarmComponent extends Component
 {
     /**
      * The number of alarms that are attached to this invite.
@@ -20,9 +20,9 @@ trait AlarmComponent
      *
      * @var array
      */
-    protected $alarm_properties = [
+    private $properties = [
         'action',
-        'trigger'
+        'trigger',
     ];
 
     /**
@@ -40,9 +40,9 @@ trait AlarmComponent
     }
 
     /**
-     * Build the alarm for output
+     * Build the alarm for output.
      *
-     * @param   array  $alarm
+     * @param array $alarm
      */
     protected function addAlarmToOutput(array $alarm)
     {
@@ -73,7 +73,7 @@ trait AlarmComponent
     protected function createAlarm(array $props): array
     {
         $alarm = [
-            'uid' => Uuid::uuid4()->toString()
+            'uid' => Uuid::uuid4()->toString(),
         ];
 
         foreach ($this->alarm_properties as $key) {

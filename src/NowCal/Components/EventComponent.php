@@ -4,7 +4,7 @@ namespace NowCal\Components;
 
 use Ramsey\Uuid\Uuid;
 
-trait EventComponent
+class EventComponent extends Component
 {
     /**
      * The properties that are allowed to be set on a VEvent.
@@ -13,7 +13,7 @@ trait EventComponent
      *
      * @var array
      */
-    protected $event_properties = [
+    private $properties = [
         'uid',
         'dtstamp',
         'dtstart',
@@ -23,13 +23,6 @@ trait EventComponent
         'duration',
         'alarm',
     ];
-
-    /**
-     * CRLF return.
-     *
-     * @var string
-     */
-    protected static $crlf = "\r\n";
 
     /**
      * This property defines the persistent, globally unique identifier for the calendar component.
@@ -96,6 +89,18 @@ trait EventComponent
      * @var string
      */
     protected $duration;
+
+    /**
+     * Create a uid for the event component.
+     *
+     * @param array $properties
+     */
+    public function __construct(array $properties = [])
+    {
+        parent::__construct($properties);
+
+        $this->uid = Uuid::uuid4()->toString();
+    }
 
     /**
      * Set the event's start date.
@@ -192,39 +197,23 @@ trait EventComponent
     }
 
     /**
-     * Set the UID parameter.
-     */
-    public function setUidParameter()
-    {
-        return $this->uid ?: $this->uid = Uuid::uuid4()->toString();
-    }
-
-    /**
-     * Set the DTStamp parameter.
-     */
-    public function setDtstampParameter()
-    {
-        return $this->dtstamp ?: $this->dtstamp = 'now';
-    }
-
-    /**
      * Create the VEvent and include all its props.
      */
-    protected function beginEvent()
+    protected function before()
     {
-        $this->setUidParameter();
-        $this->setDtstampParameter();
+        return 'BEGIN:VEVENT';
+    }
 
-        $this->output[] = 'BEGIN:VEVENT';
-
-        $this->addParametersToOutput($this->event_properties);
+    public function output()
+    {
+        return $this->addPropertiesToOutput();
     }
 
     /**
      * Close the VEvent tag.
      */
-    protected function endEvent()
+    protected function after()
     {
-        $this->output[] = 'END:VEVENT';
+        return 'END:VEVENT';
     }
 }

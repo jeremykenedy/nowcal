@@ -3,11 +3,26 @@
 namespace NowCal;
 
 use Illuminate\Support\Str;
+use NowCal\Components\AlarmComponent;
+use NowCal\Components\EventComponent;
+use NowCal\Components\CalendarComponent;
+use NowCal\Components\TimezoneComponent;
 
-class NowCal extends ComponentManager
+class NowCal
 {
-    use Traits\HasCasters,
-        Traits\HasHelpers;
+    /**
+     * The components on this event.
+     *
+     * @var array
+     */
+    protected $components = [
+        'alarm',
+        'event',
+        'calendar',
+        'timezone',
+    ];
+
+    protected $properties = [];
 
     /**
      * Holds the .ics details.
@@ -17,25 +32,60 @@ class NowCal extends ComponentManager
     protected $output = [];
 
     /**
+     * The alarm for the invite.
+     *
+     * @var \NowCal\Components\AlarmComponent
+     */
+    protected $alarm;
+
+    /**
+     * The alarm for the invite.
+     *
+     * @var \NowCal\Components\CalendarComponent
+     */
+    protected $calendar;
+
+    /**
+     * The event component for the invite.
+     *
+     * @var \NowCal\Components\EventComponent
+     */
+    protected $event;
+
+    /**
+     * The timezone component for the invite.
+     *
+     * @var \NowCal\Components\TimezoneComponent
+     */
+    protected $timezone;
+
+    /**
      * Instantiate the NowCal class.
      *
      * @param array $params
      */
-    public function __construct(array $params = [])
+    public function __construct(array $properties = [])
     {
-        $this->merge($params);
+        $this->calendar = new CalendarComponent($properties);
+        $this->alarm = new AlarmComponent($properties);
+        $this->timezone = new TimezoneComponent($properties);
+        $this->event = new EventComponent($properties);
     }
 
     /**
      * Fetch computed properties.
      *
      * @param string $name
+     *
+     * @return mixed
      */
     public function __get(string $key)
     {
-        if (method_exists(self::class, $method = 'get' . Str::studly($key) . 'Attribute')) {
+        if (method_exists(self::class, $method = 'get'.Str::studly($key).'Attribute')) {
             return $this->{$method}();
         }
+
+        return null;
     }
 
     /**
@@ -56,20 +106,6 @@ class NowCal extends ComponentManager
      * @return \NowCal\NowCal
      */
     public static function create(array $props = [])
-    {
-        return new self($props);
-    }
-
-    /**
-     * Pass the props into the class and build it.
-     *
-     * @param array $props
-     *
-     * @deprecated 1.0.0 Prefer "create" syntax
-     *
-     * @return \NowCal\NowCal
-     */
-    public static function build(array $props = [])
     {
         return new self($props);
     }
@@ -119,12 +155,12 @@ class NowCal extends ComponentManager
     {
         $this->output = [];
 
-        $this->beginCalendar();
-        $this->addTimezone();
-        $this->beginEvent();
-        $this->addAlarms();
-        $this->endEvent();
-        $this->endCalendar();
+        $this->output[] = $this->calendar()->before();
+        $this->output[] = $this->calendar()->output();
+        $this->output[] = $this->timezone()->output();
+        $this->output[] = $this->alarm()->output();
+        $this->output[] = $this->event()->output();
+        $this->output[] = $this->calendar()->after();
 
         return $this;
     }
@@ -148,7 +184,7 @@ class NowCal extends ComponentManager
     {
         $this->compile();
 
-        return implode(self::$crlf, $this->output);
+        return implode('\r\n', $this->output);
     }
 
     /**
@@ -158,68 +194,79 @@ class NowCal extends ComponentManager
      */
     public function getFileAttribute(): string
     {
-        $filename = tempnam(sys_get_temp_dir(), 'event_') . '.ic s ';
-        file_put_contents($filename, $this->plain . self::$crlf);
+        $filename = tempnam(sys_get_temp_dir(), 'event_').'.ic s ';
+        file_put_contents($filename, $this->plain.'\r\n');
 
         return $filename;
     }
 
-    /**
-     * Loop through the provided list of parameters and if available
-     * add it to the output.
-     *
-     * @param array $parameters
-     */
-    protected function addParametersToOutput(array $parameters)
+    public function timezone(?array $props = [])
     {
-        foreach ($parameters as $key) {
-            if ($this->has($key)) {
-                $this->output[] = $this->getParameter($key);
-            }
-        }
-    }
-
-    /**
-     * Get the provided parameter from the ICS spec. If not
-     * included in the spec then fail. If not provided but
-     * required then throw exception.
-     *
-     * @param string $key
-     *
-     * @throws Exception
-     *
-     * @return string
-     */
-    protected function getParameter(string $key): string
-    {
-        return $this->getParameterKey($key) . ':' . $this->getParameterValue($key);
-    }
-
-    /**
-     * Returns the iCalendar param key.
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    protected function getParameterKey(string $name): string
-    {
-        return Str::upper($name);
-    }
-
-    /**
-     * Return the associated value for the supplied iCal param.
-     *
-     * @param string $key
-     *
-     * @return string|null
-     */
-    protected function getParameterValue(string $key): ?string
-    {
-        if ($this->hasCaster($key)) {
-            return $this->cast($this->{$key}, $this->casts[$key]);
+        if (0 === func_num_args()) {
+            return $this->timezone;
         }
 
-        return $this->{$key};
+        $this->timezone = new TimezoneComponent($props);
+
+        return $this;
     }
+
+    // /**
+    //  * Loop through the provided list of parameters and if available
+    //  * add it to the output.
+    //  *
+    //  * @param array $parameters
+    //  */
+    // protected function addParametersToOutput(array $parameters)
+    // {
+    //     foreach ($parameters as $key) {
+    //         if ($this->has($key)) {
+    //             $this->output[] = $this->getParameter($key);
+    //         }
+    //     }
+    // }
+
+    // /**
+    //  * Get the provided parameter from the ICS spec. If not
+    //  * included in the spec then fail. If not provided but
+    //  * required then throw exception.
+    //  *
+    //  * @param string $key
+    //  *
+    //  * @throws Exception
+    //  *
+    //  * @return string
+    //  */
+    // protected function getParameter(string $key): string
+    // {
+    //     return $this->getParameterKey($key).':'.$this->getParameterValue($key);
+    // }
+
+    // /**
+    //  * Returns the iCalendar param key.
+    //  *
+    //  * @param string $name
+    //  *
+    //  * @return string
+    //  */
+    // protected function getParameterKey(string $name): string
+    // {
+    //     return Str::upper($name);
+    // }
+
+    // /**
+    //  * Return the associated value for the supplied iCal param.
+    //  *
+    //  * @param string $key
+    //  *
+    //  * @return string|null
+    //  */
+    // protected function getParameterValue(string $key): ?string
+    // {
+    //     if ($this->hasCaster($key)) {
+    //         return $this->cast($this->{$key}, $this->casts[$key]);
+    //     }
+
+    //     return $this->{$key};
+    // }
 }

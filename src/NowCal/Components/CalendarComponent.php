@@ -2,7 +2,7 @@
 
 namespace NowCal\Components;
 
-trait CalendarComponent
+class CalendarComponent extends Component
 {
     /**
      * The required fields for the VCalendar.
@@ -11,7 +11,7 @@ trait CalendarComponent
      *
      * @var array
      */
-    protected $calendar_properties = [
+    private $properties = [
         'prodid',
         'version',
     ];
@@ -38,18 +38,21 @@ trait CalendarComponent
     /**
      * Open the VCalendar tag and add necessary props.
      */
-    protected function beginCalendar()
+    public function before()
     {
-        $this->output[] = 'BEGIN:VCALENDAR';
+        return 'BEGIN:VCALENDAR';
+    }
 
-        $this->addParametersToOutput($this->calendar_properties);
+    public function output()
+    {
+        return $this->addParametersToOutput($this->properties);
     }
 
     /**
      * Close the VCalendar tag.
      */
-    protected function endCalendar()
+    public function after()
     {
-        $this->output[] = 'END:VCALENDAR';
+        return 'END:VCALENDAR';
     }
 }

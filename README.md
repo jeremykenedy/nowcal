@@ -43,8 +43,7 @@ The following properties can be get/set on the NowCal instance. Users can take a
 $props = [
   'start' => 'now',
   'end' => 'now + 1 hour',
-  'summary' => '',
-  'location' => ''
+  'summary' => 'It\'s peanut butter jelly time.'
 ];
 
 // Creates a NowCal instance
