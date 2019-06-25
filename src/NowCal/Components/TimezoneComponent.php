@@ -2,17 +2,24 @@
 
 namespace NowCal\Components;
 
-use Carbon\CarbonTimeZone;
-
 class TimezoneComponent extends Component
 {
+    /**
+     * The name of the component.
+     *
+     * @var string
+     */
+    protected static $name = 'timezone';
+
     /**
      * The timezone a user is in.
      *
      * @var array
      */
-    private $properties = [
+    protected static $properties = [
         'tzid',
+        'standard',
+        'daylight',
     ];
 
     /**
@@ -23,56 +30,9 @@ class TimezoneComponent extends Component
      *
      * @var \Carbon\CarbonTimeZone
      */
-    protected $tzid;
+    protected $tzid = 'UTC';
 
-    /**
-     * Configure the timezone and add it to the class.
-     *
-     * @param string|null $timezone
-     *
-     * @return mixed
-     */
-    public function timezone(?string $tzid = null)
-    {
-        if (0 === func_num_args()) {
-            return $this->get('tzid');
-        }
+    protected $standard;
 
-        $this->set('tzid', CarbonTimeZone::create($tzid));
-
-        return $this;
-    }
-
-    /**
-     * Open the VTimezone tag and add necessary props.
-     */
-    protected function addTimezone()
-    {
-        $this->tzid = $this->tzid ?: $this->timezone('UTC');
-
-        $this->output[] = 'BEGIN:VTIMEZONE';
-        $this->addStandardTimezoneToOutput();
-        $this->addDaylightTimezoneToOutput();
-        $this->output[] = 'END:VTIMEZONE';
-    }
-
-    protected function addStandardTimezoneToOutput()
-    {
-        $this->output[] = 'BEGIN:STANDARD';
-        $this->output[] = 'TZNAME:'.$this->timezone->getAbbr(false);
-        $this->output[] = 'DTSTART:'.$this->castAsDatetime('now');
-        $this->output[] = 'TZOFFSETFROM:'.$this->timezone->toOffsetName();
-        $this->output[] = 'TZOFFSETTO:'.$this->timezone->toOffsetName();
-        $this->output[] = 'END:STANDARD';
-    }
-
-    protected function addDaylightTimezoneToOutput()
-    {
-        $this->output[] = 'BEGIN:DAYLIGHT';
-        $this->output[] = 'TZNAME:'.$this->timezone->getAbbr(true);
-        $this->output[] = 'DTSTART:'.$this->castAsDatetime('now');
-        $this->output[] = 'TZOFFSETFROM:'.$this->timezone->toOffsetName();
-        $this->output[] = 'TZOFFSETTO:'.$this->timezone->toOffsetName();
-        $this->output[] = 'END:DAYLIGHT';
-    }
+    protected $daylight;
 }

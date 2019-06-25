@@ -7,13 +7,20 @@ use Ramsey\Uuid\Uuid;
 class EventComponent extends Component
 {
     /**
+     * The name of the component.
+     *
+     * @var string
+     */
+    protected static $name = 'event';
+
+    /**
      * The properties that are allowed to be set on a VEvent.
      *
      * @see https://tools.ietf.org/html/rfc5545#section-3.6.1
      *
      * @var array
      */
-    private $properties = [
+    protected static $properties = [
         'uid',
         'dtstamp',
         'dtstart',
@@ -21,7 +28,6 @@ class EventComponent extends Component
         'summary',
         'location',
         'duration',
-        'alarm',
     ];
 
     /**
@@ -194,26 +200,5 @@ class EventComponent extends Component
         }
 
         return $this;
-    }
-
-    /**
-     * Create the VEvent and include all its props.
-     */
-    protected function before()
-    {
-        return 'BEGIN:VEVENT';
-    }
-
-    public function output()
-    {
-        return $this->addPropertiesToOutput();
-    }
-
-    /**
-     * Close the VEvent tag.
-     */
-    protected function after()
-    {
-        return 'END:VEVENT';
     }
 }

@@ -5,13 +5,20 @@ namespace NowCal\Components;
 class CalendarComponent extends Component
 {
     /**
+     * The name of the component.
+     *
+     * @var string
+     */
+    protected static $name = 'calendar';
+
+    /**
      * The required fields for the VCalendar.
      *
      * @see https://tools.ietf.org/html/rfc5545#section-3.4
      *
      * @var array
      */
-    private $properties = [
+    protected static $properties = [
         'prodid',
         'version',
     ];
@@ -34,25 +41,4 @@ class CalendarComponent extends Component
      * @var string
      */
     protected $version = '2.0';
-
-    /**
-     * Open the VCalendar tag and add necessary props.
-     */
-    public function before()
-    {
-        return 'BEGIN:VCALENDAR';
-    }
-
-    public function output()
-    {
-        return $this->addParametersToOutput($this->properties);
-    }
-
-    /**
-     * Close the VCalendar tag.
-     */
-    public function after()
-    {
-        return 'END:VCALENDAR';
-    }
 }

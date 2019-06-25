@@ -11,21 +11,14 @@ use NowCal\Components\TimezoneComponent;
 class NowCal
 {
     /**
-     * The components on this event.
+     * The line end to use.
      *
-     * @var array
+     * @var string
      */
-    protected $components = [
-        'alarm',
-        'event',
-        'calendar',
-        'timezone',
-    ];
-
-    protected $properties = [];
+    protected static $crlf = '\r\n';
 
     /**
-     * Holds the .ics details.
+     * The .ics array details.
      *
      * @var array
      */
@@ -156,11 +149,12 @@ class NowCal
         $this->output = [];
 
         $this->output[] = $this->calendar()->before();
-        $this->output[] = $this->calendar()->output();
-        $this->output[] = $this->timezone()->output();
-        $this->output[] = $this->alarm()->output();
-        $this->output[] = $this->event()->output();
+        $this->output[] = $this->timezone()->output;
+        $this->output[] = $this->alarm()->output;
+        $this->output[] = $this->event()->output;
         $this->output[] = $this->calendar()->after();
+
+        echo var_dump($this->output);
 
         return $this;
     }
@@ -182,9 +176,7 @@ class NowCal
      */
     public function getPlainAttribute(): string
     {
-        $this->compile();
-
-        return implode('\r\n', $this->output);
+        return implode(self::$crlf, $this->output);
     }
 
     /**
@@ -200,6 +192,39 @@ class NowCal
         return $filename;
     }
 
+    public function alarm(?array $props = [])
+    {
+        if (0 === func_num_args()) {
+            return $this->alarm;
+        }
+
+        $this->alarm = new AlarmComponent($props);
+
+        return $this;
+    }
+
+    public function event(?array $props = [])
+    {
+        if (0 === func_num_args()) {
+            return $this->event;
+        }
+
+        $this->event = new EventComponent($props);
+
+        return $this;
+    }
+
+    public function calendar(?array $props = [])
+    {
+        if (0 === func_num_args()) {
+            return $this->calendar;
+        }
+
+        $this->calendar = new CalendarComponent($props);
+
+        return $this;
+    }
+
     public function timezone(?array $props = [])
     {
         if (0 === func_num_args()) {
@@ -210,63 +235,4 @@ class NowCal
 
         return $this;
     }
-
-    // /**
-    //  * Loop through the provided list of parameters and if available
-    //  * add it to the output.
-    //  *
-    //  * @param array $parameters
-    //  */
-    // protected function addParametersToOutput(array $parameters)
-    // {
-    //     foreach ($parameters as $key) {
-    //         if ($this->has($key)) {
-    //             $this->output[] = $this->getParameter($key);
-    //         }
-    //     }
-    // }
-
-    // /**
-    //  * Get the provided parameter from the ICS spec. If not
-    //  * included in the spec then fail. If not provided but
-    //  * required then throw exception.
-    //  *
-    //  * @param string $key
-    //  *
-    //  * @throws Exception
-    //  *
-    //  * @return string
-    //  */
-    // protected function getParameter(string $key): string
-    // {
-    //     return $this->getParameterKey($key).':'.$this->getParameterValue($key);
-    // }
-
-    // /**
-    //  * Returns the iCalendar param key.
-    //  *
-    //  * @param string $name
-    //  *
-    //  * @return string
-    //  */
-    // protected function getParameterKey(string $name): string
-    // {
-    //     return Str::upper($name);
-    // }
-
-    // /**
-    //  * Return the associated value for the supplied iCal param.
-    //  *
-    //  * @param string $key
-    //  *
-    //  * @return string|null
-    //  */
-    // protected function getParameterValue(string $key): ?string
-    // {
-    //     if ($this->hasCaster($key)) {
-    //         return $this->cast($this->{$key}, $this->casts[$key]);
-    //     }
-
-    //     return $this->{$key};
-    // }
 }

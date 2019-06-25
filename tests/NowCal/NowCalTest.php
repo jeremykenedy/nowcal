@@ -3,9 +3,17 @@
 namespace Tests\NowCal;
 
 use Tests\TestCase;
+use NowCal\NowCal;
 
 class NowCalTest extends TestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->nowcal = new NowCal();
+    }
+
     /** @test */
     public function it_can_get_a_raw_array_output()
     {

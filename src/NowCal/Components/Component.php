@@ -1,44 +1,32 @@
 <?php
 
+namespace NowCal\Components;
+
+use Illuminate\Support\Str;
 use NowCal\Interfaces\ComponentInterface;
-use NowCal\Traits\HasCalendarAttributes;
 
 abstract class Component implements ComponentInterface
 {
-    use HasCalendarAttributes;
+    /**
+     * The name of the component.
+     *
+     * @var string
+     */
+    protected static $name = '';
 
-    protected $output = [];
-
-    protected $properties = [];
-
-    protected $wrapOutput = false;
-
-    public function __construct(array $properties)
-    {
-        $this->merge($properties);
-    }
-
-    public function before()
-    {
-        return '';
-    }
-
-    public function output()
-    {
-        return $this->output;
-    }
-
-    public function after()
-    {
-        return '';
-    }
+    /**
+     * The properties to output.
+     *
+     * @var array
+     */
+    protected static $properties = [];
 
     /**
      * All the properties that need to be cast.
      *
      * @var array
      */
-    protected $casts = [
+    protected static $casts = [
         'duration' => 'duration',
         'created' => 'datetime',
         'dtstamp' => 'datetime',
@@ -51,7 +39,68 @@ abstract class Component implements ComponentInterface
      *
      * @var string
      */
-    protected $datetime_format = 'Ymd\THis\Z';
+    protected static $datetime_format = 'Ymd\THis\Z';
+
+    /**
+     * The component's output.
+     *
+     * @var array
+     */
+    protected $output = [];
+
+    /**
+     * Merge the properties supplied with the allowed props.
+     *
+     * @param array $properties
+     */
+    public function __construct(array $properties)
+    {
+        $this->merge($properties);
+    }
+
+    /**
+     * The action to take before output.
+     *
+     * @return mixed
+     */
+    public function before()
+    {
+        return 'BEGIN:V'.Str::upper(self::$name);
+    }
+
+    /**
+     * The action to take after output.
+     *
+     * @return mixed
+     */
+    public function after()
+    {
+        return 'END:V'.Str::upper(self::$name);
+    }
+
+    /**
+     * Compile the component's output array.
+     *
+     * @return mixed
+     */
+    public function compile()
+    {
+        $this->output[] = $this->before();
+        $this->addPropertiesToOutput();
+        $this->output[] = $this->after();
+    }
+
+    /**
+     * Compile and output component contents.
+     *
+     * @return array
+     */
+    public function output(): array
+    {
+        $this->compile();
+
+        return $this->output;
+    }
 
     /**
      * Get the class' property.
@@ -60,7 +109,7 @@ abstract class Component implements ComponentInterface
      *
      * @return mixed
      */
-    protected function get(string $key)
+    protected function get(string $key): ?string
     {
         if ($this->allowed($key)) {
             return $this->{$key};
@@ -100,7 +149,7 @@ abstract class Component implements ComponentInterface
      */
     protected function allowed(string $key): bool
     {
-        return in_array($key, $this->properties);
+        return in_array($key, self::$properties);
     }
 
     /**
@@ -153,7 +202,7 @@ abstract class Component implements ComponentInterface
      */
     protected function hasCaster(string $key): bool
     {
-        return array_key_exists($key, $this->casts);
+        return array_key_exists($key, self::$casts);
     }
 
     /**
@@ -166,7 +215,7 @@ abstract class Component implements ComponentInterface
     protected function castAsDatetime($value): string
     {
         return Carbon::parse($value ?? 'now')
-            ->format($this->datetime_format);
+            ->format(self::datetime_format);
     }
 
     /**
@@ -180,5 +229,62 @@ abstract class Component implements ComponentInterface
     {
         return CarbonInterval::fromString($value ?? '0s')
             ->spec();
+    }
+
+    /**
+     * Loop through the component's properties and add it to
+     * the output.
+     */
+    protected function addPropertiesToOutput()
+    {
+        foreach (self::$properties as $key) {
+            if ($this->has($key)) {
+                $this->output[] = $this->getProperty($key);
+            }
+        }
+    }
+
+    /**
+     * Get the provided property from the ICS spec. If not
+     * included in the spec then fail. If not provided but
+     * required then throw exception.
+     *
+     * @param string $key
+     *
+     * @return string
+     */
+    protected function getProperty(string $key): string
+    {
+        return $this->getPropertyKey($key)
+            .':'.
+            $this->getPropertyValue($key);
+    }
+
+    /**
+     * Returns the iCalendar param key.
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    protected function getPropertyKey(string $name): string
+    {
+        return Str::upper($name);
+    }
+
+    /**
+     * Return the associated value for the supplied iCal param.
+     *
+     * @param string $key
+     *
+     * @return string|null
+     */
+    protected function getPropertyValue(string $key): ?string
+    {
+        if ($this->hasCaster($key)) {
+            return $this->cast($this->{$key}, self::$casts[$key]);
+        }
+
+        return $this->{$key};
     }
 }
